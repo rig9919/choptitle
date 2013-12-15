@@ -1,0 +1,73 @@
+#! /bin/bash
+
+convertsecs() {
+ secs=$(printf %.0f $1)
+ ((h=${secs}/3600))
+ ((m=(${secs}%3600)/60))
+ ((s=${secs}%60))
+ printf "%02d:%02d:%02d\n" $h $m $s
+}
+
+TARGETPATH="/var/tmp/findscreen"
+LIMIT=200
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+	echo "usage: findscreen [-l] screen video..."
+	echo "options:"
+	echo "    -l, --limit"
+	echo "        position (seconds) in video to stop searching for screen"
+	exit
+fi
+if [[ "$1" == "-l" || "$1" == "--limit" ]]; then
+	shift
+	if [[ $1 != *[!0-9]* ]]; then
+		LIMIT=$1
+		shift
+	else
+		echo bad limit
+		exit -1
+	fi
+fi
+COMPAREIMG="$1"
+shift
+INFILES=("$@")
+
+if [ ! -f "$COMPAREIMG" ] ; then
+	echo "bad screen, doesn't exist"
+	exit -1
+fi
+
+if [ -d "$TARGETPATH" ]; then
+	rm -rf "$TARGETPATH/*.bmp"
+else
+	mkdir "$TARGETPATH"
+fi
+if [ ! -d "$TARGETPATH" ]; then
+	echo temporary path could not be created
+	exit -1
+fi
+
+i=1
+
+for INFILE in "${INFILES[@]}"; do
+	printf "$INFILE:"
+	ffmpeg -i "$INFILE" -vf select='eq(pict_type\,I)' -vsync 2 -f image2 "$TARGETPATH/%05d.bmp" -loglevel debug 2>&1 | awk '{ if ($10 == "pict_type:I" || $9 == "pict_type:I") print substr($6,3); fflush(stdout)}' | while read timestamp; do
+		if (( $(echo "$timestamp > $LIMIT" | bc -l) )); then
+			break
+		fi
+	#	list=("$TARGETPATH/$ID"-*.bmp)
+	#	length=${#list[@]}
+	#	last_pos=$((length - 1))
+	#	second_last_pos=$((length - 2))
+	#	last=${list[${last_pos}]}
+	#	second_last=${list[${second_last_pos}]}
+		#echo last=$last, second_last=$second_last
+	#	file=$last
+		#mv -v "$file" "$TARGETPATH/$last_timestamp.bmp"
+		file="$(printf $TARGETPATH/%05d.bmp $i)"
+		imghash="$(./hashcompare.py $COMPAREIMG $file | cut -d':' -f2)"
+		printf "%05d:%s:%02d\n" $i $timestamp $imghash
+		last_timestamp=$timestamp
+		let i=i+1
+	done | sort -t ":" -n -k 3 | head -n1
+#	ffmpeg -ss $(convertsecs $timestamp) -i "$INFILE" -y -f image2 -vcodec mjpeg -vframes 1 $TARGETPATH/$(basename -z -s .mkv $(basename -z "$INFILE")).jpg
+done

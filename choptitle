@@ -1,0 +1,39 @@
+#! /bin/bash
+
+convertsecs() {
+ #secs=$(printf %.0f $1) 
+    h=$(echo "$1/3600" | bc)
+    m=$(echo "scale=0; ($1%3600)/60" | bc)
+    s=$(echo "scale=4; $1 - (($h*3600) + ($m*60))" | bc)
+ #((h=${1}/3600)) 
+ #((m=(${1}%3600)/60)) 
+ #s=$(echo "scale=4; $1 - (($h*3600) + ($m*60))")
+ #((s=${secs}%60)) 
+ printf "%02d:%02d:%f\n" $h $m $s
+}
+
+preview_flag=0
+if [[ "$1" == "-p" || "$1" == "--preview" ]]; then
+	preview_flag=1
+	shift
+fi
+TITLELENGTH=$1
+
+while read line; do
+	file=$(echo "$line" | cut -d':' -f1)
+	filename=$(basename -z -s .mkv "$file")
+	begintitle=$(echo "$line" | cut -d':' -f3)
+	begintitle=$(echo "scale=4; $begintitle + 0.1" | bc)
+	endtitle=$(echo "scale=4; $begintitle + $TITLELENGTH - 0.1" | bc)
+	echo "$file		$begintitle"
+	if [ $preview_flag -eq 1 ]; then
+		ffplay "$file" -ss $begintitle -t $TITLELENGTH
+	else
+		#ffmpeg -i "$file" -t $begintitle -acodec copy -vcodec copy ./$filename-begin.mkv
+		#ffmpeg -i "$file" -ss $endtitle -acodec copy -vcodec copy ./$filename-end.mkv
+#		ffmpeg -f concat -i <(printf "file '%s\nfile %s\n'" $filename-begin.mkv $filename-end.mkv) -acodec copy -vcodec copy ./$filename.mkv
+		#mkvmerge -o ./$filename.mkv $filename-begin.mkv +$filename-end.mkv
+		mkvmerge -o ./$filename.mkv --split parts:-$(convertsecs ${begintitle}),+$(convertsecs ${endtitle})- "$file"
+		#rm $filename-*.mkv
+	fi
+done

@@ -1,0 +1,30 @@
+#! /bin/bash
+
+TARGETPATH="/var/tmp/findscreen"
+
+convertsecs() { 
+ #secs=$(printf %.0f $1) 
+	h=$(echo "$1/3600" | bc)
+	m=$(echo "scale=0; ($1%3600)/60" | bc)
+	s=$(echo "scale=4; $1 - (($h*3600) + ($m*60))" | bc)
+ #((h=${1}/3600)) 
+ #((m=(${1}%3600)/60)) 
+ #s=$(echo "scale=4; $1 - (($h*3600) + ($m*60))")
+ #((s=${secs}%60)) 
+ printf "%02d:%02d:%f\n" $h $m $s 
+}
+
+while read line; do
+	file=$(echo "$line" | cut -d':' -f1)
+	timestamp=$(echo "$line" | cut -d':' -f3)
+	filename=$(basename -z -s .mkv $(basename -z "$file"))
+	#mplayer -noconsolecontrols -vo "jpeg:outdir=$TARGETPATH" -frames 1 -ss $timestamp "$file" > /dev/null 2>&1
+	#if [ -f "$TARGETPATH/00000001.jpg" ]; then
+	#	mv -v "$TARGETPATH/00000001.jpg" "$TARGETPATH"/$(basename -z -s .mkv $(basename -z "$file")).jpg
+	#else
+	#	echo "findscreen: mplayer failed to capture screen"
+	#	continue
+	#fi
+	echo $filename
+	ffmpeg -i "$file" -an -ss $timestamp -y -vframes 1 $TARGETPATH/$filename.jpg > /dev/null 2>&1
+done
