@@ -1,4 +1,5 @@
 #! /bin/bash
+VERSION="0.1"
 
 convertsecs() {
  secs=$(printf %.0f $1)
