@@ -1,19 +1,7 @@
 #! /bin/bash
-VERSION="0.1"
+source common.sh
 
 TARGETPATH="/var/tmp/findscreen"
-
-convertsecs() { 
- #secs=$(printf %.0f $1) 
-	h=$(echo "$1/3600" | bc)
-	m=$(echo "scale=0; ($1%3600)/60" | bc)
-	s=$(echo "scale=4; $1 - (($h*3600) + ($m*60))" | bc)
- #((h=${1}/3600)) 
- #((m=(${1}%3600)/60)) 
- #s=$(echo "scale=4; $1 - (($h*3600) + ($m*60))")
- #((s=${secs}%60)) 
- printf "%02d:%02d:%f\n" $h $m $s 
-}
 
 while read line; do
 	file=$(echo "$line" | cut -d':' -f1)

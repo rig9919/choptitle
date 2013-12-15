@@ -1,4 +1,5 @@
 findscreen searches a video or group of videos for a certain screen output
+
 format is <video path>:<I-frame number>:<timestamp>:<difference factor>
 the lower the difference factor, the more closely the screen resembles that
 particular I-frame

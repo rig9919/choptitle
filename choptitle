@@ -1,34 +1,53 @@
 #! /bin/bash
-VERSION="0.1"
+source common.sh
 
-convertsecs() {
- #secs=$(printf %.0f $1) 
-    h=$(echo "$1/3600" | bc)
-    m=$(echo "scale=0; ($1%3600)/60" | bc)
-    s=$(echo "scale=4; $1 - (($h*3600) + ($m*60))" | bc)
- #((h=${1}/3600)) 
- #((m=(${1}%3600)/60)) 
- #s=$(echo "scale=4; $1 - (($h*3600) + ($m*60))")
- #((s=${secs}%60)) 
- printf "%02d:%02d:%f\n" $h $m $s
+show_help() {
+	echo "usage: choptitle [po] <length>"
 }
 
 preview_flag=0
-if [[ "$1" == "-p" || "$1" == "--preview" ]]; then
-	preview_flag=1
-	shift
+offset="0.0"
+while true; do
+	case "$1" in
+		-p|--preview)
+			preview_flag=1
+			shift;;
+		-o|--offset)
+			shift
+			offset="$1"
+			shift;;
+		-v|--version)
+			echo "$VERSION"
+			exit;;
+		-h|--help)
+			show_help
+			exit;;
+		-*)
+			echo "choptitle: unrecognized option $1" >&2
+			exit -1;;
+		*)
+			break;;
+	esac
+done
+if [[ "$1" == "" ]]; then
+	echo "choptitle: no length specified"
+	exit -1
 fi
-TITLELENGTH=$1
+title_length="$1"
+
+safe_room="0.1" # seconds after the start of the title and before the end
+                # to make it more likely that we arent cutting at an
+                # I-frame that contains show content
 
 while read line; do
 	file=$(echo "$line" | cut -d':' -f1)
 	filename=$(basename -z -s .mkv "$file")
 	begintitle=$(echo "$line" | cut -d':' -f3)
-	begintitle=$(echo "scale=4; $begintitle + 0.1" | bc)
-	endtitle=$(echo "scale=4; $begintitle + $TITLELENGTH - 0.1" | bc)
+	begintitle=$(echo "scale=4; $begintitle + $offset + $safe_room" | bc)
+	endtitle=$(echo "scale=4; $begintitle + $title_length - $safe_room" | bc)
 	echo "$file		$begintitle"
 	if [ $preview_flag -eq 1 ]; then
-		ffplay "$file" -ss $begintitle -t $TITLELENGTH
+		ffplay "$file" -ss $begintitle -t $title_length
 	else
 		#ffmpeg -i "$file" -t $begintitle -acodec copy -vcodec copy ./$filename-begin.mkv
 		#ffmpeg -i "$file" -ss $endtitle -acodec copy -vcodec copy ./$filename-end.mkv
