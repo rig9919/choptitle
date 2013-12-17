@@ -1,14 +1,14 @@
 choptitle
 =========
 
+The choptitle suite of scripts is used to assist in the removal of television
+show openings. It consists of 3 end-user scripts.
+
 prerequisites
 -------------
 ffmpeg  
 mkvtoolnix  
 pHash
-
-The choptitle suite of scripts is used to assist in the removal of television
-show openings. It consists of 3 end-user scripts.
 
 findscreen
 ----------
