@@ -6,6 +6,7 @@ show_help() {
 	echo "options:"
 	echo "    -l, --limit"
 	echo "        position (seconds) in video to stop searching for screen"
+	exit
 }
 
 list_iframes() {

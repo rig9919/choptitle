@@ -3,6 +3,12 @@ source ~/src/choptitle/common.sh
 
 show_help() {
 	echo "usage: choptitle [po] <length>"
+	echo "options:"
+	echo "    -p, --preview"
+	echo "        just preview the portion that would be chopped"
+	echo "    -o, --offset"
+	echo "        distance (seconds) from beginning of segment to be removed"
+	exit
 }
 
 preview_flag=0
