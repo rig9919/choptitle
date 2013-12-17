@@ -1,5 +1,5 @@
 #! /bin/bash
-source common.sh
+source ~/src/choptitle/common.sh
 
 show_help() {
 	echo "usage: choptitle [po] <length>"
