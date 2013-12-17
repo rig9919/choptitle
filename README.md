@@ -3,8 +3,8 @@ choptitle
 
 prerequisites
 -------------
-ffmpeg
-mkvtoolnix
+ffmpeg  
+mkvtoolnix  
 pHash
 
 The choptitle suite of scripts is used to assist in the removal of television
@@ -14,9 +14,8 @@ findscreen
 ----------
 Used to search a video or group of videos for a certain screen. The output can
 be read as follows:
-<pre>
-<video path>:<iframe number>:<timestamp>:<hamming distance>
-</pre>
+
+    <video path>:<iframe number>:<timestamp>:<hamming distance>
 
 takeshot
 --------
@@ -29,5 +28,5 @@ directory with the segment removed.
 
 notes and bugs
 --------------
-These are made specifically for my library of videos and as such currently only
-deal with videos in the matroska container.
+These are made specifically for my setup and as such currently only deal with
+videos in the matroska container.
