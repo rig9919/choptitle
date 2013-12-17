@@ -1,6 +1,6 @@
-findscreen searches a video or group of videos for a certain screen output
+findscreen searches a video or group of videos for a certain screen
 
-format is <video path>:<I-frame number>:<timestamp>:<difference factor>
+output format is <video path>:<I-frame number>:<timestamp>:<difference factor>
 the lower the difference factor, the more closely the screen resembles that
 particular I-frame
 
