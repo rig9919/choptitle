@@ -12,6 +12,7 @@ show_help() {
 tmp_path="/var/tmp/findscreen"
 limit=200
 screens=()
+method="hash"
 
 while true; do
 	case "$1" in
@@ -22,6 +23,10 @@ while true; do
 		-s|--screen)
 			shift
 			screens+=("$1")
+			shift;;
+		-m|--method)
+			shift
+			method="$1"
 			shift;;
 		-v|--version)
 			echo "$VERSION"
@@ -56,6 +61,11 @@ for s in "${screens[@]}"; do
 	fi
 done
 
+if [[ "$method" != "hash" && "$method" != "hh" && "$method" != "hist" ]]; then
+	echo "findscreen: bad comparison method" >&2
+	exit -1
+fi
+
 if [ ${#INFILES[@]} -eq 0 ]; then
 	echo "findscreen: must specifiy at least one video" >&2
 	exit -1
@@ -88,7 +98,8 @@ for INFILE in "${INFILES[@]}"; do
 				break
 			fi
 			file="$(printf $tmp_path/%05d.bmp $i)"
-			imghash="$(./hashcompare.py $screen $file | grep '(hist)' | cut -d':' -f2)"
+			echo "./hashcompare.py $screen $file | cut -d':' -f2" >&2
+			imghash="$(./hashcompare.py $screen $file | cut -d':' -f2)"
 			printf "%05d:%s:%06d\n" $i $timestamp $imghash
 			last_timestamp=$timestamp
 			let i=i+1
