@@ -83,13 +83,13 @@ i=1
 for INFILE in "${INFILES[@]}"; do
 	printf "$INFILE:"
 	for screen in "${screens[@]}"; do
-		list_iframes "$INFILE" | while read timestamp; do
+		list_iframes "$INFILE" "$tmp_path/" | while read timestamp; do
 			if (( $(echo "$timestamp > $limit" | bc -l) )); then
 				break
 			fi
 			file="$(printf $tmp_path/%05d.bmp $i)"
-			imghash="$(./hashcompare.py $screen $file | cut -d':' -f2)"
-			printf "%05d:%s:%02d\n" $i $timestamp $imghash
+			imghash="$(./hashcompare.py $screen $file | grep '(hist)' | cut -d':' -f2)"
+			printf "%05d:%s:%06d\n" $i $timestamp $imghash
 			last_timestamp=$timestamp
 			let i=i+1
 		done #| sort -t ":" -n -k 3 | head -n1

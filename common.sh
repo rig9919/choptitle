@@ -2,7 +2,7 @@
 VERSION="0.4"
 
 list_iframes() {
-    ffmpeg -i "$1" -vf select='eq(pict_type\,I)' -vsync 2 -f image2 "$tmp_path/%05d.bmp" -loglevel debug 2>&1 | awk '{ if ($10 == "pict_type:I" || $9 == "pict_type:I") print substr($6,3); fflush(stdout)}'
+    ffmpeg -i "$1" -vf select='eq(pict_type\,I)' -vsync 2 -f image2 "$2%05d.bmp" -loglevel debug 2>&1 | awk '{ if ($10 == "pict_type:I" || $9 == "pict_type:I") print substr($6,3); fflush(stdout)}'
 }
 
 convertsecs() {

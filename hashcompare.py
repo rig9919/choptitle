@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 import sys
 import os
-phash_dir="./py-phash/build/lib.linux-x86_64-2.7/pHash.so"
+import math
+import operator
+import Image
+phash_dir="/home/kyle/src/choptitle/py-phash/build/lib.linux-x86_64-2.7/pHash.so"
 path, filename = os.path.split(phash_dir)
 filename, ext = os.path.splitext(filename)
 sys.path.append(path)
@@ -23,10 +26,18 @@ def radial_compare(file1, file2):
     else:
         return 0
 
+def hist_compare(file1, file2):
+    im = Image.open(file1)
+    h1 = im.histogram()
+    h2 = Image.open(file2).resize(im.size, Image.ANTIALIAS).histogram()
+    rms = math.sqrt(reduce(operator.add, map(lambda a,b: (a-b)**2, h1, h2))/len(h1))
+    return int(round(rms))
+
 if __name__=='__main__':
     import sys
     file1 = sys.argv[1]
     for f in sys.argv[2:]:
         print f + ' (hash): ' + str(compare(file1, f))
         print f + ' (digest): ' + str(radial_compare(file1, f))
+        print f + ' (hist): ' + str(hist_compare(file1, f))
     #print compare(file1, file2)
