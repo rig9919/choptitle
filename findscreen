@@ -98,8 +98,7 @@ for INFILE in "${INFILES[@]}"; do
 				break
 			fi
 			file="$(printf $tmp_path/%05d.bmp $i)"
-			echo "./hashcompare.py $screen $file | cut -d':' -f2" >&2
-			imghash="$(./hashcompare.py $screen $file | cut -d':' -f2)"
+			imghash="$(./hashcompare.py $screen $file | grep "($method)" | cut -d':' -f2)"
 			printf "%05d:%s:%06d\n" $i $timestamp $imghash
 			last_timestamp=$timestamp
 			let i=i+1
