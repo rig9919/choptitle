@@ -22,16 +22,16 @@ can be read as follows:
 Hamming distance is derived from the differences in the perceptual hashes of
 the screen and the iframe. A perceptual hash is a representation of the
 signature of an image. If two images have the same perceptual hash, they
-likely look similar to each other. __It is more useful on shows with title
-sequences that are more likely to begin directly on an iframe__.  
+likely look similar to each other. It is more useful on shows with title
+sequences that are more likely to begin directly on an iframe.  
 
 Histogram difference is the difference between the colors of the screen and the
-iframe. __It is more useful on shows with title sequences that do not begin
-directly on an iframe__.  
+iframe. It is more useful on shows with title sequences that do not begin
+directly on an iframe.  
 
 Both measurements are normalized and added together to become hh which is just
-shorthand for hamming+histogram and __should be the most accurate measurement to
-use for determining whether a screen and iframe match__.
+shorthand for hamming+histogram.  __The hh measurement should be the most
+accurate one to use for determining whether a screen and iframe match__.
 
 takeshot
 --------
