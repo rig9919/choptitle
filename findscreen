@@ -12,8 +12,10 @@ filename, ext = os.path.splitext(filename)
 sys.path.append(path)
 module = __import__(filename)
 reload(module)
-
 import pHash
+
+__version__ = subprocess.check_output("source ./common.sh; echo $VERSION", shell=True, executable="/bin/bash")
+
 def compare(file1, file2):
     # <hamming distance of image vs its negative> = 62
     max_phash = 62
@@ -47,6 +49,7 @@ def init_parser():
                usage='%(prog)s [lm] -s screen videos...',
                description='Compare screen with I-frames of videos')
     parser.add_argument('videos', type=str, nargs='+')
+    parser.add_argument('-v', '--version', action='version', version=__version__)
     required_args = parser.add_argument_group('requirements',
                'at least one is required')
     required_args.add_argument('-s', '--screen', action='append')
