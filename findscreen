@@ -43,7 +43,7 @@ def hist_compare(file1, file2):
     #return int(round(rms))
 
 def init_parser():
-    parser = argparse.ArgumentParser(prog='hashcompare', add_help=False,
+    parser = argparse.ArgumentParser(prog='findscreen', add_help=False,
                usage='%(prog)s [lm] -s screen videos...',
                description='Compare screen with I-frames of videos')
     parser.add_argument('videos', type=str, nargs='+')
@@ -53,7 +53,6 @@ def init_parser():
     optional_args = parser.add_argument_group('options',
                'optional')
     optional_args.add_argument('-l', '--limit', default=200, type=int)
-    optional_args.add_argument('-m', '--method', default='hh')
     optional_args.add_argument('-d', '--temporary-dir', default='/var/tmp/findscreen')
     args = parser.parse_args()
     return args
@@ -111,7 +110,13 @@ if __name__=='__main__':
     for sep_toc in sorted(splitted_toc):
         sorted_toc = sorted(sep_toc, key=operator.itemgetter(6))
         print '%s:%05d:%s:%s:%06d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hh', sorted_toc[0][6]*100000)
+        sorted_toc = sorted(sep_toc, key=operator.itemgetter(5))
+        print '%s:%05d:%s:%s:%06d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hist', sorted_toc[0][5]*100000)
+        sorted_toc = sorted(sep_toc, key=operator.itemgetter(4))
+        print '%s:%05d:%s:%s:%06d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hash', sorted_toc[0][4]*100000)
     
+
+
     #sorted_toc = sorted(toc, key=operator.itemgetter(6))
     #print sorted_toc
     #print '%s:%05d:%s:%s:%06d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hh', sorted_toc[0][6]*100000)
