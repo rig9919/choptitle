@@ -17,6 +17,7 @@ reload(module)
 import pHash
 
 __version__ = check_output(["grep", "VERSION", "common.sh"]).replace("VERSION=","").replace("\"","")
+__cols__ = int(os.popen('stty size', 'r').read().split()[1])
 
 def compare(file1, file2):
     # <hamming distance of image vs its negative> = 62
@@ -62,6 +63,20 @@ def init_parser():
     args = parser.parse_args()
     return args
 
+def list_iframes(video, limit, tmp_dir):
+    ffmpeg_cmd = "ffmpeg -i '" + video + "' -to " + str(limit) + " -vf select='eq(pict_type\,I)' -vsync 2 -f image2 '" + tmp_dir + "/%05d.bmp' -loglevel debug"
+    awk_cmd = "awk '{ if ($10 == \"pict_type:I\" || $9 == \"pict_type:I\") print substr($6,3); fflush(stdout)}'"
+    ffmpeg_proc = Popen(shlex.split(ffmpeg_cmd), stdout=PIPE, stderr=STDOUT)
+    awk_proc = Popen(shlex.split(awk_cmd), stdin=ffmpeg_proc.stdout, stdout=PIPE)
+    ffmpeg_proc.stdout.close()
+    return awk_proc.communicate()[0]
+ 
+def show_status(s):
+    print >> sys.stderr, ' '*__cols__ + '\r',
+    sys.stderr.flush()
+    print >> sys.stderr, s + '\r',
+    sys.stderr.flush()
+
 if __name__=='__main__':
     args = init_parser()
     if not args.videos:
@@ -78,12 +93,8 @@ if __name__=='__main__':
             bmps = glob.glob(args.temporary_dir + "/*.bmp")
             for bmp in bmps:
                 os.remove(bmp)
-            ffmpeg_cmd = "ffmpeg -i '" + video + "' -to " + str(args.limit) + " -vf select='eq(pict_type\,I)' -vsync 2 -f image2 '" + args.temporary_dir + "/%05d.bmp' -loglevel debug"
-            awk_cmd = cmd2= "awk '{ if ($10 == \"pict_type:I\" || $9 == \"pict_type:I\") print substr($6,3); fflush(stdout)}'"
-            ffmpeg_proc = Popen(shlex.split(ffmpeg_cmd), stdout=PIPE, stderr=STDOUT)
-            awk_proc = Popen(shlex.split(awk_cmd), stdin=ffmpeg_proc.stdout, stdout=PIPE)
-            ffmpeg_proc.stdout.close()
-            output = awk_proc.communicate()[0]
+            show_status(os.path.basename(video) + ': getting iframe times...')
+            output = list_iframes(video, args.limit, args.temporary_dir)
             if not output:
                 print 'error detecting i-frames'
                 exit()
@@ -94,7 +105,7 @@ if __name__=='__main__':
                     break
                 ph = compare(screen, iframe_path)
                 hist = hist_compare(screen, iframe_path)
-                print >> sys.stderr, video, ':', iframe, ':', timestamp
+                show_status(os.path.basename(video) + ': analyzing, ' + str(int(round(float(timestamp)/args.limit*100))) + '% done')
                 toc.append([screen, video, iframe, timestamp, ph, hist])
                 iframe+=1
             #print f, '(hash):', ph
