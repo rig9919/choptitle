@@ -4,7 +4,8 @@ import os
 import math
 import operator
 import argparse
-import subprocess
+import glob
+from subprocess import Popen, check_output, PIPE, STDOUT
 import shlex
 import Image
 phash_dir="/home/kyle/src/choptitle/py-phash/build/lib.linux-x86_64-2.7/pHash.so"
@@ -15,7 +16,7 @@ module = __import__(filename)
 reload(module)
 import pHash
 
-__version__ = subprocess.check_output(["grep", "VERSION", "common.sh"]).replace("VERSION=","").replace("\"","")
+__version__ = check_output(["grep", "VERSION", "common.sh"]).replace("VERSION=","").replace("\"","")
 
 def compare(file1, file2):
     # <hamming distance of image vs its negative> = 62
@@ -74,10 +75,13 @@ if __name__=='__main__':
     toc = []
     for screen in args.screen:
         for video in args.videos:
-            ffmpeg_cmd = "ffmpeg -i '" + video + "' -t " + str(args.limit) + " -vf select='eq(pict_type\,I)' -vsync 2 -f image2 '" + args.temporary_dir + "/%05d.bmp' -loglevel debug"
+            bmps = glob.glob(args.temporary_dir + "/*.bmp")
+            for bmp in bmps:
+                os.remove(bmp)
+            ffmpeg_cmd = "ffmpeg -i '" + video + "' -to " + str(args.limit) + " -vf select='eq(pict_type\,I)' -vsync 2 -f image2 '" + args.temporary_dir + "/%05d.bmp' -loglevel debug"
             awk_cmd = cmd2= "awk '{ if ($10 == \"pict_type:I\" || $9 == \"pict_type:I\") print substr($6,3); fflush(stdout)}'"
-            ffmpeg_proc = subprocess.Popen(shlex.split(ffmpeg_cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            awk_proc = subprocess.Popen(shlex.split(awk_cmd), stdin=ffmpeg_proc.stdout, stdout=subprocess.PIPE)
+            ffmpeg_proc = Popen(shlex.split(ffmpeg_cmd), stdout=PIPE, stderr=STDOUT)
+            awk_proc = Popen(shlex.split(awk_cmd), stdin=ffmpeg_proc.stdout, stdout=PIPE)
             ffmpeg_proc.stdout.close()
             output = awk_proc.communicate()[0]
             if not output:
