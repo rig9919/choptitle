@@ -1,5 +1,5 @@
 #! /bin/bash
-VERSION="0.4"
+VERSION="1.0"
 
 list_iframes() {
 	i=1
