@@ -74,7 +74,7 @@ if __name__=='__main__':
     toc = []
     for screen in args.screen:
         for video in args.videos:
-            ffmpeg_cmd = "ffmpeg -i '" + video + "' -to " + str(args.limit) + " -vf select='eq(pict_type\,I)' -vsync 2 -f image2 '" + args.temporary_dir + "/%05d.bmp' -loglevel debug"
+            ffmpeg_cmd = "ffmpeg -i '" + video + "' -t " + str(args.limit) + " -vf select='eq(pict_type\,I)' -vsync 2 -f image2 '" + args.temporary_dir + "/%05d.bmp' -loglevel debug"
             awk_cmd = cmd2= "awk '{ if ($10 == \"pict_type:I\" || $9 == \"pict_type:I\") print substr($6,3); fflush(stdout)}'"
             ffmpeg_proc = subprocess.Popen(shlex.split(ffmpeg_cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             awk_proc = subprocess.Popen(shlex.split(awk_cmd), stdin=ffmpeg_proc.stdout, stdout=subprocess.PIPE)
