@@ -89,14 +89,14 @@ if __name__=='__main__':
                 exit()
             iframe = 1
             for timestamp in output.split('\n'):
-                if timestamp:
-                    iframe_path = args.temporary_dir + '/' + '%05d'%iframe + '.bmp'
-                    if not os.path.exists(iframe_path):
-                        break
-                    ph = compare(screen, iframe_path)
-                    hist = hist_compare(screen, iframe_path)
-                    toc.append([screen, video, iframe, timestamp, ph, hist])
-                    iframe+=1
+                iframe_path = args.temporary_dir + '/' + '%05d'%iframe + '.bmp'
+                if (not timestamp) or (not os.path.exists(iframe_path)):
+                    break
+                ph = compare(screen, iframe_path)
+                hist = hist_compare(screen, iframe_path)
+                print >> sys.stderr, video, ':', iframe, ':', timestamp
+                toc.append([screen, video, iframe, timestamp, ph, hist])
+                iframe+=1
             #print f, '(hash):', ph
             #print f, '(hist):', hist
             #print f, '(hh):', ph+hist

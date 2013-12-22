@@ -48,3 +48,5 @@ notes and bugs
 with videos in the matroska container.
 * They are very dependent on iframes so videos with fewer iframes will have less
 accurate cut points.
+* Results from findscreen may be off by 1 iframe on consecutive runs with nothing
+changed. Not sure why.
