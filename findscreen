@@ -5,6 +5,7 @@ import math
 import operator
 import argparse
 import subprocess
+import shlex
 import Image
 phash_dir="/home/kyle/src/choptitle/py-phash/build/lib.linux-x86_64-2.7/pHash.so"
 path, filename = os.path.split(phash_dir)
@@ -14,7 +15,7 @@ module = __import__(filename)
 reload(module)
 import pHash
 
-__version__ = subprocess.check_output("source ./common.sh; echo $VERSION", shell=True, executable="/bin/bash")
+__version__ = subprocess.check_output(["grep", "VERSION", "common.sh"]).replace("VERSION=","").replace("\"","")
 
 def compare(file1, file2):
     # <hamming distance of image vs its negative> = 62
@@ -73,19 +74,25 @@ if __name__=='__main__':
     toc = []
     for screen in args.screen:
         for video in args.videos:
-            output = subprocess.check_output("source ./common.sh; list_iframes " + video.replace(" ", "\ ") + " " + args.temporary_dir.replace(" ", "\ ") + " " + str(args.limit), shell=True, executable="/bin/bash")
+            ffmpeg_cmd = "ffmpeg -i '" + video + "' -to " + str(args.limit) + " -vf select='eq(pict_type\,I)' -vsync 2 -f image2 '" + args.temporary_dir + "/%05d.bmp' -loglevel debug"
+            awk_cmd = cmd2= "awk '{ if ($10 == \"pict_type:I\" || $9 == \"pict_type:I\") print substr($6,3); fflush(stdout)}'"
+            ffmpeg_proc = subprocess.Popen(shlex.split(ffmpeg_cmd), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            awk_proc = subprocess.Popen(shlex.split(awk_cmd), stdin=ffmpeg_proc.stdout, stdout=subprocess.PIPE)
+            ffmpeg_proc.stdout.close()
+            output = awk_proc.communicate()[0]
             if not output:
                 print 'error detecting i-frames'
                 exit()
-            for line in output.split('\n'):
-                if line:
-                    iframe, timestamp = line.split(':')
-                    iframe_path = args.temporary_dir + '/' + str(iframe) + '.bmp'
+            iframe = 1
+            for timestamp in output.split('\n'):
+                if timestamp:
+                    iframe_path = args.temporary_dir + '/' + '%05d'%iframe + '.bmp'
                     if not os.path.exists(iframe_path):
                         break
                     ph = compare(screen, iframe_path)
                     hist = hist_compare(screen, iframe_path)
                     toc.append([screen, video, iframe, timestamp, ph, hist])
+                    iframe+=1
             #print f, '(hash):', ph
             #print f, '(hist):', hist
             #print f, '(hh):', ph+hist
