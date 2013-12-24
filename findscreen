@@ -76,6 +76,19 @@ def show_status(s):
     print >> sys.stderr, s + '\r',
     sys.stderr.flush()
 
+def normalize_measures(values):
+    f_sum_of_squares = lambda x, y: x+y**2
+    _, _, _, _, ph_list, hist_list = zip(*values)
+    ph_sqrt_sos = math.sqrt(reduce(f_sum_of_squares, ph_list[1:], ph_list[0]**2))
+    hist_sqrt_sos = math.sqrt(reduce(f_sum_of_squares, hist_list[1:], hist_list[0]**2))
+    # normalize the phash and histogram values
+    for item in values:
+        item[4] /= ph_sqrt_sos
+        item[5] /= hist_sqrt_sos
+        item.append(item[4] + item[5])
+
+
+
 if __name__=='__main__':
     args = init_parser()
     args.screens = args.screen
@@ -121,16 +134,8 @@ if __name__=='__main__':
             #print f, '(hh):', ph+hist
             #sys.stdout.write(str(hist) + ',')
 
-    #print compare(file1, file2)
-    f_sum_of_squares = lambda x, y: x+y**2
-    _, _, _, _, ph_list, hist_list = zip(*toc)
-    ph_sqrt_sos = math.sqrt(reduce(f_sum_of_squares, ph_list[1:], ph_list[0]**2))
-    hist_sqrt_sos = math.sqrt(reduce(f_sum_of_squares, hist_list[1:], hist_list[0]**2))
-    # normalize the phash and histogram values
-    for item in toc:
-        item[4] /= ph_sqrt_sos
-        item[5] /= hist_sqrt_sos
-        item.append(item[4] + item[5])
+    # put hash and hist measurements on same scale so they can be added
+    normalize_measures(toc)
 
     # display
     splitted_toc = []
