@@ -78,17 +78,18 @@ def show_status(s):
 
 if __name__=='__main__':
     args = init_parser()
+    args.screens = args.screen
     if not args.videos:
         print 'Must specifiy at least one video'
         exit()
 
-    if not args.screen:
+    if not args.screens:
         print 'Must specify at least one screen'
         exit()
 
     toc = []
     status_perc = 0
-    status = 'v:%d/%d | s:%d/%d | t:%f | pct:%f' % (0, len(args.videos), 0, len(args.screen), 0, status_perc*100)
+    status = 'v:%d/%d | s:%d/%d | t:%f | pct:%f' % (0, len(args.videos), 0, len(args.screens), 0, status_perc*100)
     for vid_index, video in enumerate(args.videos):
         bmps = glob.glob(args.temporary_dir + "/*.bmp")
         for bmp in bmps:
@@ -99,7 +100,7 @@ if __name__=='__main__':
             print 'error detecting i-frames'
             exit()
 
-        for screen_index, screen in enumerate(args.screen):
+        for screen_index, screen in enumerate(args.screens):
             iframe = 1
             for timestamp in output.split('\n'):
                 iframe_path = args.temporary_dir + '/' + '%05d'%iframe + '.bmp'
@@ -107,11 +108,11 @@ if __name__=='__main__':
                     break
                 ph = compare(screen, iframe_path)
                 hist = hist_compare(screen, iframe_path)
-                c1 = (vid_index + float(screen_index+1)/len(args.screen)) / len(args.videos)
-                c2 = 1.0/(len(args.videos)*len(args.screen))
+                c1 = (vid_index + float(screen_index+1)/len(args.screens)) / len(args.videos)
+                c2 = 1.0/(len(args.videos)*len(args.screens))
                 c3 = float(timestamp)/args.limit * c2
                 status_perc = c1-c2+c3
-                status = 'v:%d/%d | s:%d/%d | t:%f | pct:%f' % (vid_index+1, len(args.videos), screen_index+1, len(args.screen), float(timestamp), status_perc*100)
+                status = 'v:%d/%d | s:%d/%d | t:%f | pct:%f' % (vid_index+1, len(args.videos), screen_index+1, len(args.screens), float(timestamp), status_perc*100)
                 show_status('%s | analyzing...' % (status))
                 toc.append([screen, video, iframe, timestamp, ph, hist])
                 iframe+=1
