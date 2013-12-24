@@ -88,16 +88,20 @@ if __name__=='__main__':
         exit()
 
     toc = []
-    for screen in args.screen:
-        for video in args.videos:
-            bmps = glob.glob(args.temporary_dir + "/*.bmp")
-            for bmp in bmps:
-                os.remove(bmp)
-            show_status(os.path.basename(video) + ': getting iframe times...')
-            output = list_iframes(video, args.limit, args.temporary_dir)
-            if not output:
-                print 'error detecting i-frames'
-                exit()
+    status = ""
+    status_perc = 0
+##### TODO: notify user of overall percent
+    for vid_index, video in enumerate(args.videos):
+        bmps = glob.glob(args.temporary_dir + "/*.bmp")
+        for bmp in bmps:
+            os.remove(bmp)
+        show_status('%s: getting iframe times...' % (status))
+        output = list_iframes(video, args.limit, args.temporary_dir)
+        if not output:
+            print 'error detecting i-frames'
+            exit()
+
+        for screen_index, screen in enumerate(args.screen):
             iframe = 1
             for timestamp in output.split('\n'):
                 iframe_path = args.temporary_dir + '/' + '%05d'%iframe + '.bmp'
@@ -105,7 +109,12 @@ if __name__=='__main__':
                     break
                 ph = compare(screen, iframe_path)
                 hist = hist_compare(screen, iframe_path)
-                show_status(os.path.basename(video) + ': analyzing, ' + str(int(round(float(timestamp)/args.limit*100))) + '% done')
+                c1 = (vid_index + float(screen_index+1)/len(args.screen)) / len(args.videos)
+                c2 = 1.0/(len(args.videos)*len(args.screen))
+                c3 = float(timestamp)/args.limit * c2
+                status_perc = c1-c2+c3
+                status = 'v:%d/%d, s:%d/%d, t:%f, done:%f' % (vid_index+1, len(args.videos), screen_index+1, len(args.screen), float(timestamp), status_perc*100)
+                show_status('%s: analyzing...' % (status))
                 toc.append([screen, video, iframe, timestamp, ph, hist])
                 iframe+=1
             #print f, '(hash):', ph
