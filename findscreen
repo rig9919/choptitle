@@ -8,12 +8,8 @@ import glob
 from subprocess import Popen, check_output, PIPE, STDOUT
 import shlex
 import Image
-phash_dir="/home/kyle/src/choptitle/py-phash/build/lib.linux-x86_64-2.7/pHash.so"
-path, filename = os.path.split(phash_dir)
-filename, ext = os.path.splitext(filename)
-sys.path.append(path)
-module = __import__(filename)
-reload(module)
+__phash_dir__="/home/kyle/src/choptitle/py-phash/build/lib.linux-x86_64-2.7/pHash.so"
+sys.path.append(os.path.dirname(__phash_dir__))
 import pHash
 
 __version__ = check_output(["grep", "VERSION", "common.sh"]).replace("VERSION=","").replace("\"","")
