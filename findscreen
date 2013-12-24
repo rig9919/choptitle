@@ -52,18 +52,17 @@ def init_parser():
                usage='%(prog)s [lm] -s screen videos...',
                description='Compare screen with I-frames of videos')
     parser.add_argument('videos', type=str, nargs='+')
+    parser.add_argument('-s', '--screen', action='append', required=True)
+    parser.add_argument('-l', '--limit', default=200, type=int)
+    parser.add_argument('-d', '--temporary-dir', default='/var/tmp/findscreen')
     parser.add_argument('-v', '--version', action='version', version=__version__)
-    required_args = parser.add_argument_group('requirements',
-               'at least one is required')
-    required_args.add_argument('-s', '--screen', action='append')
-    optional_args = parser.add_argument_group('options',
-               'optional')
-    optional_args.add_argument('-l', '--limit', default=200, type=int)
-    optional_args.add_argument('-d', '--temporary-dir', default='/var/tmp/findscreen')
+    parser.add_argument('-h', '--help', action='help')
     args = parser.parse_args()
     return args
 
 def list_iframes(video, limit, tmp_dir):
+    if not os.path.isdir(tmp_dir):
+        os.makedirs(tmp_dir)
     ffmpeg_cmd = "ffmpeg -i '" + video + "' -to " + str(limit) + " -vf select='eq(pict_type\,I)' -vsync 2 -f image2 '" + tmp_dir + "/%05d.bmp' -loglevel debug"
     awk_cmd = "awk '{ if ($10 == \"pict_type:I\" || $9 == \"pict_type:I\") print substr($6,3); fflush(stdout)}'"
     ffmpeg_proc = Popen(shlex.split(ffmpeg_cmd), stdout=PIPE, stderr=STDOUT)
@@ -89,12 +88,12 @@ if __name__=='__main__':
 
     toc = []
     status_perc = 0
-    status = 'v:%d/%d, s:%d/%d, t:%f, done:%f' % (0, len(args.videos), 0, len(args.screen), 0, status_perc*100)
+    status = 'v:%d/%d | s:%d/%d | t:%f | pct:%f' % (0, len(args.videos), 0, len(args.screen), 0, status_perc*100)
     for vid_index, video in enumerate(args.videos):
         bmps = glob.glob(args.temporary_dir + "/*.bmp")
         for bmp in bmps:
             os.remove(bmp)
-        show_status('%s: getting iframe times...' % (status))
+        show_status('%s | getting iframe times...' % (status))
         output = list_iframes(video, args.limit, args.temporary_dir)
         if not output:
             print 'error detecting i-frames'
@@ -112,8 +111,8 @@ if __name__=='__main__':
                 c2 = 1.0/(len(args.videos)*len(args.screen))
                 c3 = float(timestamp)/args.limit * c2
                 status_perc = c1-c2+c3
-                status = 'v:%d/%d, s:%d/%d, t:%f, done:%f' % (vid_index+1, len(args.videos), screen_index+1, len(args.screen), float(timestamp), status_perc*100)
-                show_status('%s: analyzing...' % (status))
+                status = 'v:%d/%d | s:%d/%d | t:%f | pct:%f' % (vid_index+1, len(args.videos), screen_index+1, len(args.screen), float(timestamp), status_perc*100)
+                show_status('%s | analyzing...' % (status))
                 toc.append([screen, video, iframe, timestamp, ph, hist])
                 iframe+=1
             #print f, '(hash):', ph
