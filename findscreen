@@ -88,9 +88,8 @@ if __name__=='__main__':
         exit()
 
     toc = []
-    status = ""
     status_perc = 0
-##### TODO: notify user of overall percent
+    status = 'v:%d/%d, s:%d/%d, t:%f, done:%f' % (0, len(args.videos), 0, len(args.screen), 0, status_perc*100)
     for vid_index, video in enumerate(args.videos):
         bmps = glob.glob(args.temporary_dir + "/*.bmp")
         for bmp in bmps:
