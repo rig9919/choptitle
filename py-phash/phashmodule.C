@@ -200,9 +200,9 @@ file_ready_for_reading (const char *filename)
 ///--- Module functions ---///
 /* initialization */
 PyMODINIT_FUNC
-initpHash(void)
+initPypHash(void)
 {
-    PyObject *m = Py_InitModule3("pHash", pHash_methods, module_docstring);
+    PyObject *m = Py_InitModule3("PypHash", pHash_methods, module_docstring);
     if (m ==NULL) return;
     /* Error handler */
     pHashError = PyErr_NewException("pHash.error", NULL, NULL);
