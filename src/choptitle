@@ -31,7 +31,7 @@ if __name__=='__main__':
     args = init_parser()
 
     if args.file:
-        source = args.file
+        source = open(args.file)
     else:
         source = sys.stdin
 
