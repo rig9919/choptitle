@@ -10,7 +10,7 @@ import shlex
 import Image
 import PypHash
 
-__version__ = "1.2"
+__version__ = "git"
 __cols__ = int(os.popen('stty size', 'r').read().split()[1])
 
 def compare(file1, file2):
@@ -87,7 +87,7 @@ def normalize_measures(values):
 
 def skip_detection(videos):
     for video in videos:
-        print '%s:%05d:%s:%s:%06d' % ( video, 0, 0, 'zero', 0)
+        print '%s:%d:%s:%s:%d' % ( video, 0, 0, 'zero', 0)
     exit()
 
 
@@ -154,11 +154,11 @@ if __name__=='__main__':
     # sep_toc is a list that contains lists of data from a single video
     for sep_toc in sorted(splitted_toc):
         sorted_toc = sorted(sep_toc, key=operator.itemgetter(6))
-        print '%s:%05d:%s:%s:%06d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hh', sorted_toc[0][6]*100000)
+        print '%s:%d:%s:%s:%d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hh', sorted_toc[0][6]*100000)
         sorted_toc = sorted(sep_toc, key=operator.itemgetter(5))
-        print '%s:%05d:%s:%s:%06d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hist', sorted_toc[0][5]*100000)
+        print '%s:%d:%s:%s:%d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hist', sorted_toc[0][5]*100000)
         sorted_toc = sorted(sep_toc, key=operator.itemgetter(4))
-        print '%s:%05d:%s:%s:%06d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hash', sorted_toc[0][4]*100000)
+        print '%s:%d:%s:%s:%d' % ( sorted_toc[0][1], int(sorted_toc[0][2]), sorted_toc[0][3], 'hash', sorted_toc[0][4]*100000)
     
 
 
