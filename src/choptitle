@@ -45,5 +45,8 @@ if __name__=='__main__':
         if args.preview:
             cmd = "ffplay '%s' -ss %f -t %d" % (vid, begin, args.duration)
         else:
-            cmd = "mkvmerge -o './%s' --split parts:-%s,+%s- '%s'" % (outfile, timedelta(seconds=begin), timedelta(seconds=end), vid)
+            if begin > 0:
+                cmd = "mkvmerge -o './%s' --split parts:-%s,+%s- '%s'" % (outfile, timedelta(seconds=begin), timedelta(seconds=end), vid)
+            else:
+                cmd = "mkvmerge -o './%s' --split parts:%s- '%s'" % (outfile, timedelta(seconds=end), vid)
         subprocess.Popen(shlex.split(cmd)).wait()
