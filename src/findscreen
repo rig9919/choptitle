@@ -43,12 +43,16 @@ def hist_compare(file1, file2):
 
 def init_parser():
     parser = argparse.ArgumentParser(prog='findscreen', add_help=False,
-               usage='%(prog)s [lm] -s screen videos...',
-               description='Compare screen with I-frames of videos')
+               usage='%(prog)s ([-ld] -s screen... | -z) videos...',
+               description='Find the timestamp of the scene most closely matching the screen(s)')
     parser.add_argument('videos', type=str, nargs='+')
-    parser.add_argument('-s', '--screen', action='append', required=True)
-    parser.add_argument('-l', '--limit', default=200, type=int)
-    parser.add_argument('-d', '--temporary-dir', default='/var/tmp/findscreen')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-s', '--screen', action='append', metavar='S',
+               help='Search videos for an I-frame that looks like S')
+    group.add_argument('-z', '--zero-timestamps', action='store_true',
+               help='Generate timestamps as if the matching I-frames were at 00:00:00')
+    parser.add_argument('-l', '--limit', default=200, type=int, metavar='L')
+    parser.add_argument('-d', '--temp-dir', default='/var/tmp/findscreen', metavar='D')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     parser.add_argument('-h', '--help', action='help')
     args = parser.parse_args()
@@ -81,11 +85,20 @@ def normalize_measures(values):
         item[5] /= hist_sqrt_sos
         item.append(item[4] + item[5])
 
+def skip_detection(videos):
+    for video in videos:
+        print '%s:%05d:%s:%s:%06d' % ( video, 0, 0, 'zero', 0)
+    exit()
 
 
 if __name__=='__main__':
     args = init_parser()
+
+    if args.zero_timestamps:
+        skip_detection(args.videos)
+
     args.screens = set(args.screen)
+
     if not args.videos:
         print 'Must specifiy at least one video'
         exit()
@@ -98,11 +111,11 @@ if __name__=='__main__':
     status_perc = 0
     status = 'v:%d/%d | s:%d/%d | t:%f | pct:%f' % (0, len(args.videos), 0, len(args.screens), 0, status_perc*100)
     for vid_index, video in enumerate(args.videos):
-        bmps = glob.glob(args.temporary_dir + "/*.bmp")
+        bmps = glob.glob(args.temp_dir + "/*.bmp")
         for bmp in bmps:
             os.remove(bmp)
         show_status('%s | getting iframe times...' % (status))
-        output = list_iframes(video, args.limit, args.temporary_dir)
+        output = list_iframes(video, args.limit, args.temp_dir)
         if not output:
             print 'error detecting i-frames'
             exit()
@@ -110,7 +123,7 @@ if __name__=='__main__':
         for screen_index, screen in enumerate(args.screens):
             iframe = 1
             for timestamp in output.split('\n'):
-                iframe_path = args.temporary_dir + '/' + '%05d'%iframe + '.bmp'
+                iframe_path = args.temp_dir + '/' + '%05d'%iframe + '.bmp'
                 if (not timestamp) or (not os.path.exists(iframe_path)):
                     break
                 ph = compare(screen, iframe_path)
