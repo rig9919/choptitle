@@ -9,7 +9,7 @@ VERSION=$(shell git describe --tags --long)
 
 all:
 		cd ./src/py-phash && $(PYTHON) ./setup.py build
-		mkdir $(BUILDDIR)
+		mkdir -p $(BUILDDIR)
 		cp ./src/findscreen $(BUILDDIR)/findscreen
 		cp ./src/choptitle $(BUILDDIR)/choptitle
 		sed -i "s/__version__ = \"git\"/__version__ = \"$(VERSION)\"/" $(BUILDDIR)/findscreen
