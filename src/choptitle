@@ -6,7 +6,7 @@ import subprocess
 import shlex
 from datetime import timedelta
 
-__version__ = "1.1"
+__version__ = "1.2"
 
 def init_parser():
     parser = argparse.ArgumentParser(prog='choptitle', add_help=False,

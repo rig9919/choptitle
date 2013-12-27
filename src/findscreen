@@ -8,11 +8,9 @@ import glob
 from subprocess import Popen, check_output, PIPE, STDOUT
 import shlex
 import Image
-__phash_dir__="/home/kyle/src/choptitle/py-phash/build/lib.linux-x86_64-2.7/PypHash.so"
-sys.path.append(os.path.dirname(__phash_dir__))
 import PypHash
 
-__version__ = "1.1"
+__version__ = "1.2"
 __cols__ = int(os.popen('stty size', 'r').read().split()[1])
 
 def compare(file1, file2):
